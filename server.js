@@ -8,8 +8,10 @@ const multer = require('multer')
 const upload = multer({ dest: 'uploads/' })
 
 app.set('view engine', 'hbs')
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
 app.use('/', express.static(__dirname + '/public'))
 app.use('/images', express.static(__dirname + '/images'))
 
@@ -29,16 +31,17 @@ app.post('/signup', upload.single('avatar'), async (req, res) => {
     // console.log('req body', req.body);
 
     // moved the images  from uploads folder to images folder with extension
-    const oldPath = __dirname + '/uploads/' + req.file.filename
-    const newPath = __dirname + '/images/' + 'avatar_' + req.body.username + '.' + req.file.mimetype.split('/').pop()
+    const oldPath = __dirname + '/uploads/' + req.file.filename  //this contain only filename without extension
+    const newPath = __dirname + '/images/' + 'avatar_' + req.body.username + '.' + req.file.mimetype.split('/').pop()  // this conatiner file with extension
 
     await fs.rename(oldPath, newPath)
 
     const user = await Users.create({
         username: req.body.username,
         email: req.body.email,
-        password: req.body.password , //in production we will use hash of password
-        avatar: '/images/' + 'avatar_' + req.body.username + '.' + req.file.mimetype.split('/').pop()  
+        password: req.body.password, //in production we will use hash of password
+        // we keep the path of our image in our database
+        avatar: '/images/' + 'avatar_' + req.body.username + '.' + req.file.mimetype.split('/').pop()
     })
     res.status(201).send(`user ${user.id}  created`)
 })
