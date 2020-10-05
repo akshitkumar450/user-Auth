@@ -2,6 +2,7 @@ const express = require('express')
 const session = require('express-session');
 const app = express();
 const { db, Users } = require('./db')
+const fs = require('fs').promises
 
 const multer = require('multer')
 const upload = multer({ dest: 'uploads/' })
@@ -9,7 +10,8 @@ const upload = multer({ dest: 'uploads/' })
 app.set('view engine', 'hbs')
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use('/',express.static(__dirname+'/public'))
+app.use('/', express.static(__dirname + '/public'))
+app.use('/images', express.static(__dirname + '/images'))
 
 // to make a cookie 
 app.use(session({
@@ -26,10 +28,16 @@ app.post('/signup', upload.single('avatar'), async (req, res) => {
     console.log('req file', req.file);
     console.log('req body', req.body);
 
+    const oldPath = __dirname + '/uploads/' + req.file.filename
+    const newPath = __dirname + '/images/' + 'avatar_' + req.body.username + '.' + req.file.mimetype.split('/').pop()
+
+    await fs.rename(oldPath, newPath)
+
     const user = await Users.create({
         username: req.body.username,
         email: req.body.email,
-        password: req.body.password   //in production we will use hash of password
+        password: req.body.password , //in production we will use hash of password
+        avatar: '/images/' + 'avatar_' + req.body.username + '.' + req.file.mimetype.split('/').pop()  
     })
     res.status(201).send(`user ${user.id}  created`)
 })
