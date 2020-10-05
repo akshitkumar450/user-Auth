@@ -25,9 +25,10 @@ app.get('/signup', (req, res) => {
 })
 
 app.post('/signup', upload.single('avatar'), async (req, res) => {
-    console.log('req file', req.file);
-    console.log('req body', req.body);
+    // console.log('req file', req.file);
+    // console.log('req body', req.body);
 
+    // moved the images  from uploads folder to images folder with extension
     const oldPath = __dirname + '/uploads/' + req.file.filename
     const newPath = __dirname + '/images/' + 'avatar_' + req.body.username + '.' + req.file.mimetype.split('/').pop()
 
@@ -46,14 +47,13 @@ app.get('/login', (req, res) => {
     res.render('login')
 })
 
-
 app.post('/login', async (req, res) => {
     const user = await Users.findOne({ where: { username: req.body.username } }) // we first find the username 
     if (!user) {
-        return res.status(404).render('login', { error: 'no such username found' })
+        return res.status(404).render('login', { error: '!! no such username found' })
     }
     if (user.password !== req.body.password) {
-        return res.status(401).render('login', { error: 'incorrect password' })
+        return res.status(401).render('login', { error: ' !! incorrect password' })
     }
 
     req.session.userId = user.id
